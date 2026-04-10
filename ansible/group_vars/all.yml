@@ -1,0 +1,13 @@
+# Application Variables
+app_repo: "https://github.com/emmanuel-adekiitan/theepicbook.git"
+app_path: "/var/www/epicbook"
+app_port: 3000
+
+# Infrastructure Variables
+backend_private_ip: "10.0.2.4"
+
+# Database Variables
+db_host: "epic-db-cebmi1.mysql.database.azure.com"
+db_user: "epicadmin"
+db_pass: "{{ lookup('env', 'DB_PASSWORD') }}"
+db_name: "epicbook"

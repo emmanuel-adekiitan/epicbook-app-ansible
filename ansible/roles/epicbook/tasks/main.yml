@@ -1,0 +1,70 @@
+---
+- name: Install networking and database tools
+  apt:
+    name: [git, socat, mysql-client]
+    state: present
+    update_cache: yes
+  become: yes
+
+- name: Ensure web root exists with correct permissions
+  file:
+    path: "{{ app_path }}"
+    state: directory
+    owner: azureuser
+    group: azureuser
+    mode: '0755'
+  become: yes
+
+- name: Clone TheEpicBook Repository
+  git:
+    repo: "{{ app_repo }}"  # Use the variable from all.yml
+    dest: "{{ app_path }}"  # Use the variable from all.yml
+    version: main
+    force: yes
+  become: yes
+  become_user: azureuser 
+
+- name: Create .env file for the application
+  copy:
+    dest: "{{ app_path }}/.env"
+    content: |
+      PORT={{ app_port }}
+      DB_HOST=127.0.0.1
+      DB_USER={{ db_user }}
+      DB_PASS={{ db_pass }}
+      DB_NAME={{ db_name }}
+    owner: azureuser
+    group: azureuser
+    mode: '0600'
+
+- name: Install Node.js dependencies
+  npm:
+    path: "{{ app_path }}"
+    state: present
+
+- name: Setup Port Relay (The "Localhost" Trick)
+  shell: |
+    pkill -f "socat TCP-LISTEN:3306" || true
+    nohup socat TCP-LISTEN:3306,fork,bind=127.0.0.1 TCP:{{ backend_private_ip }}:3306 > /dev/null 2>&1 &
+  become: yes
+  async: 10
+  poll: 0
+
+- name: Start EpicBook with PM2
+  shell: |
+    export PATH=$PATH:/usr/bin:/usr/local/bin
+    pm2 delete epicbook || true
+    # Pointing to server.js in the cloned directory
+    pm2 start server.js --name epicbook
+    pm2 save
+  args:
+    chdir: "{{ app_path }}"
+    executable: /bin/bash
+  become: yes
+  become_user: azureuser
+  environment:
+    PORT: "{{ app_port }}"
+    DB_HOST: "127.0.0.1"
+    DB_USER: "{{ db_user }}"
+    DB_PASS: "{{ db_pass }}"
+    DB_NAME: "{{ db_name }}"
