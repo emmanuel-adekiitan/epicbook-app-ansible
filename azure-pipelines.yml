@@ -5,11 +5,12 @@ pool:
   name: 'Default'
 
 variables:
-- group: epicbook-secrets
+- group: Finance-secrets  # <--- Change this line here
 
 steps:
 - script: |
-    export DB_PASSWORD=$(DB_PASSWORD)
+    # This maps the Library secret to an Environment Variable for Ansible
+    export DB_PASSWORD=$(DB_PASSWORD) 
     ansible-playbook -i ansible/inventory.ini ansible/site.yml
   displayName: 'Run Ansible Deployment'
   env:
