@@ -2,15 +2,14 @@ trigger:
 - main
 
 pool:
-  name: 'Default'
+  name: 'Linux-Agent'  # This MUST match the name in your screenshot
 
 variables:
-- group: Finance-secrets  # <--- Change this line here
+- group: Finance-secrets
 
 steps:
 - script: |
-    # This maps the Library secret to an Environment Variable for Ansible
-    export DB_PASSWORD=$(DB_PASSWORD) 
+    export DB_PASSWORD=$(DB_PASSWORD)
     ansible-playbook -i ansible/inventory.ini ansible/site.yml
   displayName: 'Run Ansible Deployment'
   env:
