@@ -17,8 +17,8 @@
 
 - name: Clone TheEpicBook Repository
   git:
-    repo: "{{ app_repo }}"  # Use the variable from all.yml
-    dest: "{{ app_path }}"  # Use the variable from all.yml
+    repo: "{{ app_repo }}"
+    dest: "{{ app_path }}"
     version: main
     force: yes
   become: yes
@@ -50,11 +50,17 @@
   async: 10
   poll: 0
 
+- name: Install PM2 globally
+  npm:
+    name: pm2
+    global: yes
+    state: present
+  become: yes
+
 - name: Start EpicBook with PM2
   shell: |
-    export PATH=$PATH:/usr/bin:/usr/local/bin
+    npm install
     pm2 delete epicbook || true
-    # Pointing to server.js in the cloned directory
     pm2 start server.js --name epicbook
     pm2 save
   args:
@@ -68,3 +74,4 @@
     DB_USER: "{{ db_user }}"
     DB_PASS: "{{ db_pass }}"
     DB_NAME: "{{ db_name }}"
+    PATH: "{{ ansible_env.PATH }}:/usr/bin:/usr/local/bin" # Ensures PM2 is in the path
