@@ -1,0 +1,16 @@
+trigger:
+- main
+
+pool:
+  name: 'Default'
+
+variables:
+- group: epicbook-secrets
+
+steps:
+- script: |
+    export DB_PASSWORD=$(DB_PASSWORD)
+    ansible-playbook -i ansible/inventory.ini ansible/site.yml
+  displayName: 'Run Ansible Deployment'
+  env:
+    DB_PASSWORD: $(DB_PASSWORD)
