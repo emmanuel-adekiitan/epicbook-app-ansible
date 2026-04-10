@@ -2,15 +2,18 @@ trigger:
 - main
 
 pool:
-  name: 'Linux-Agent'  # This MUST match the name in your screenshot
+  name: 'Linux-Agent'
 
 variables:
 - group: Finance-secrets
 
 steps:
 - script: |
+    # This environment variable tells Ansible to skip the "yes/no" prompt
+    export ANSIBLE_HOST_KEY_CHECKING=False
     export DB_PASSWORD=$(DB_PASSWORD)
     ansible-playbook -i ansible/inventory.ini ansible/site.yml
   displayName: 'Run Ansible Deployment'
   env:
     DB_PASSWORD: $(DB_PASSWORD)
+    ANSIBLE_HOST_KEY_CHECKING: 'False'
