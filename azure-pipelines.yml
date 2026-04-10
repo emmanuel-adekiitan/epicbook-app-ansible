@@ -6,10 +6,12 @@ pool:
 
 variables:
 - group: Finance-secrets
+ 
 
 steps:
 - script: |
-    # This environment variable tells Ansible to skip the "yes/no" prompt
+    # Set permissions for the key that was checked out
+    chmod 600 ansible/id_ansible_rsa
     export ANSIBLE_HOST_KEY_CHECKING=False
     export DB_PASSWORD=$(DB_PASSWORD)
     ansible-playbook -i ansible/inventory.ini ansible/site.yml
